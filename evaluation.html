@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>RATE ME!</title>
+
+  <script src="qaws.js"></script>
+
+  <style>
+    body {
+      font-family: sans-serif;
+      background-image: url(img/intro.png); 
+      // background-image: url(img/background.png);
+      background-size: 1000px;
+      background-repeat: no-repeat;
+      background-position: 0px 30px;
+    }
+    h1 {
+      font-weight: strong;
+      font-size: 300%;
+      font-family: "Verdana";
+    }
+    h2 {
+      font-weight: normal;
+      font-size: 200%;
+      font-family: "Verdana";
+    }
+    p {
+      font-weight: normal;
+      font-size: 120%;
+    }
+    input[type=button] {
+      background-color: #A01010; /* Red */
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 24px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 24px;
+      margin:10px 10px 10px 10px;
+    }
+
+    input[type=image] {
+      background-color: #A01010; /* Red */
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 24px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 24px;
+      margin:10px 10px 10px 10px;
+      width:100px;
+      height:100px;
+    }
+
+    .col {
+        float: left;
+        width: 20%;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div align='center' id='textup'>
+    <h2> </h2>
+</div>
+    
+    <!-- text -->
+    <h1>
+    <div align='center' id='text_title'> Rate your experience! </div>
+    </h1>
+
+    <div align='center'> <img width=450 id='image_default' src="img/pepper_experience.jpg" alt=""/> </div>
+
+    <div align='center' id='buttons'>
+        <div class="col"><input id="star1" type="image" src="img/star1.png" id="run" value="Start" onclick="reactToVote(1)"></div>
+        <div class="col"><input id="star2" type="image" src="img/star2.png" id="run" value="Start" onclick="reactToVote(2)"></div>
+        <div class="col"><input id="star3" type="image" src="img/star3.png" id="run" value="Start" onclick="reactToVote(3)"></div>
+        <div class="col"><input id="star4" type="image" src="img/star4.png" id="run" value="Start" onclick="reactToVote(4)"></div>
+        <div class="col"><input id="star5" type="image" src="img/star5.png" id="run" value="Start" onclick="reactToVote(5)"></div>
+    </div>
+
+
+    <br>
+
+
+  <!-- ****** SCRIPTS ****** -->
+
+  <script>
+
+    var ip=window.location.hostname;
+    if (ip=='')
+        ip='127.0.0.1';
+    port = 9100;
+
+    console.log("Trying connection...")
+    wsrobot_init(ip,port);
+
+
+    var codeport = 9010;
+    var codeurl = "ws://"+ip+":"+codeport+"/websocketserver";
+    console.log(codeurl);
+    codews = new WebSocket(codeurl);
+
+    var ctrlport = 9110;
+    var ctrlurl = "ws://"+ip+":"+ctrlport+"/ctrlwebsocketserver";
+    console.log(ctrlurl);
+    ctrlws = new WebSocket(ctrlurl);
+
+    function iminit() {
+        codews.send(
+            "begin()\n" +
+            "im.setRelativeDemoPath('hri2019')\n" +
+            "im.init()\n" +        
+            "robot.setAlive(True)\n" +
+            "robot.normalPosture()\n" +
+            "robot.startFaceTracking()\n");
+        console.log('IM init');
+    }
+
+    setTimeout(iminit,1000)
+
+    function reactToVote(vote) {
+       console.log("vote is "+vote);
+       document.getElementById("star"+vote).style="opacity:0.4;filter:alpha(opacity=40);"
+       code = "\n" +
+           "vote = int("+vote+")\n"+
+           "comment = 'empty comment'\n"+
+           "if vote == 1:\n"+
+           "    comment = 'Oh, I guess I should work harder then'\n"+
+           "elif vote == 2:\n"+
+           "    comment = 'I surely have space for improvement'\n"+
+           "elif vote == 3:\n"+
+           "    comment = 'I will do even better next time'\n"+
+           "elif vote == 4:\n"+
+           "    comment = 'Glad to hear that, but I can do even better'\n"+
+           "elif vote == 5:\n"+
+           "    comment = 'Wow! I\'m so glad to hear that!'\n"+
+            "begin()\n" +
+            "app = qi.Application(['App', '--qi-url=' + url ])\n" +
+            "app.start() # non blocking\n" +
+            "session = app.session\n" +
+            "memory_service=app.session.service('ALMemory')\n" +
+            "tts_service = session.service('ALTextToSpeech')\n"+
+            "tts_service.setLanguage('English')\n"+
+            "tts_service.setParameter('speed', 90)\n"+
+            "tts_service.say(comment)"
+            //"end()\n";
+        console.log(code);
+        codews.send(code);
+    }
+
+  </script>
+
+</body>
+</html>
+
